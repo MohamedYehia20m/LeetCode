@@ -1,6 +1,19 @@
-# Write your MySQL query statement below
-Select w1.id 
-from weather w1 
-join weather w2
-on DATEDIFF(w1.recordDate, w2.recordDate) = 1
-where w1.temperature > w2.temperature
+WITH PreviousWeatherData AS
+(
+    SELECT 
+        id,
+        recordDate,
+        temperature, 
+        LAG(temperature, 1) OVER (ORDER BY recordDate) AS PreviousTemperature,
+        LAG(recordDate, 1) OVER (ORDER BY recordDate) AS PreviousRecordDate
+    FROM 
+        Weather
+)
+SELECT 
+    id 
+FROM 
+    PreviousWeatherData
+WHERE 
+    temperature > PreviousTemperature
+AND 
+    recordDate = DATE_ADD(PreviousRecordDate, INTERVAL 1 DAY);
